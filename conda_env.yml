@@ -1,0 +1,29 @@
+name: fcrn_bidding
+channels:
+  - conda-forge
+dependencies:
+  - cvxpy=1.1.5
+  - pandas=1.0.5
+  - numpy=1.19.1 #1.17.4
+  - scipy=1.5.2
+  - nbconvert=5.6.1
+  - nbformat=4.4.0
+  - mysql-connector-python=8.0.21
+  - pip=20.2.3
+  - pip:
+    - tqdm
+    - ujson
+    - cplex
+    # - pytest #==5.3.1
+    # - pytest-cov #==2.8.1W
+    # - pytest-xdist
+    - mxnet==1.6.0
+    - gluonts==0.5.2
+    - pyyaml==5.3.1
+    - cvxopt==1.2.5
+    - schedule==0.6.0
+    - influxdb==5.3.0
+    - requests==2.24.0
+#    - joblib==0.14.1
+    - matplotlib==3.1.2
+#    - scikit-learn==0.22.1

@@ -1,0 +1,11 @@
+version: '2'
+services:
+    pipeline:
+        build: .
+            # context: .
+            # dockerfile: Dockerfile
+            # tty: True
+        volumes:
+          - ./src:/app/src
+          - ./configuration.yml:/app/configuration.yml
+        restart: 'on-failure'

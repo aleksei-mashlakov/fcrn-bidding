@@ -1,0 +1,413 @@
+appName: FCRN-bidding
+logLevel: DEBUG
+time_step: '15'
+
+devices:
+  lut_bess:
+    name: 'LUT_BESS'
+    type: 'BESS'
+    time_step: '15'
+    mode: 'simulation' #'real_testing'
+    properties:
+      max_power_kw: 20
+      max_energy_kwh: 140
+      rt_eff_perc: 96
+      up_bess_limit: 0.9
+      low_bess_limit: 0.2
+      cost_euro_kwh: 378
+      end_of_life: 3312
+      ToU_MWh_euro: 83.28
+      grid_capacity_mw: 0.5
+      next_day_soc: 0.55
+      FiT_MWh_euro: 0.7
+      init_soc_perc: 75.0
+    FCRN:
+      f_low_limit: 49.9
+      f_up_limit: 50.1
+      f_dead_band: 0.05
+      f_zero: 50.0
+    database:
+      host: "localhost"
+      port: 43306
+      user: "sdfasdfdsaf"
+      password: "egdfgdfgdfg"
+      database: "sdfsdfsdfsdfs"
+    measurements:
+      load:
+        lut:
+          - "total"
+    forecasts:
+      load: "LUT-load-frcst"
+  lvdc_bess:
+    name: 'LVDC_BESS'
+    type: 'BESS'
+    time_step: '15'
+    mode: 'simulation'
+    properties:
+      max_power_kw: 15
+      max_energy_kwh: 30
+      rt_eff_perc: 96
+      up_bess_limit: 1.0
+      low_bess_limit: 0.3
+      cost_euro_kwh: 378
+      end_of_life: 3312
+      ToU_MWh_euro: 74.27
+      grid_capacity_mw: 0.1
+      next_day_soc: 0.65
+      FiT_MWh_euro: 0.7
+      init_soc_perc: 75.0
+    FCRN:
+      f_low_limit: 49.9
+      f_up_limit: 50.1
+      f_dead_band: 0.05
+      f_zero: 50.0
+    database:
+    measurements:
+      load:
+        LVDC-load:
+          - "amr_kw"
+    forecasts:
+      load: "LVDC-load-frcst"
+
+bidding:
+  period: 96 # 4 * 24 h
+  dt: 0.25 # 15 min = 0.25 h
+
+io:
+  databases:
+    influxdb1:
+      host: ""
+      port: 8086
+      username: ""
+      password: ""
+      database: ""
+      glob_measurement: ""
+      measurements:
+        FCRN:
+          fields:
+            - 'price'
+            - 'power'
+          tags:
+            Type: 'FCR-N'
+          freq: '1h'
+          fill: 'previous'
+          agg: 'max'
+        # FCRD:
+        #   tag_name: 'Type'
+        #   fields:
+        #     - 'price'
+        #     - 'power'
+        #   tag: 'FCR-D'
+        #   agg: 'max'
+    influxdb2:
+      host: ""
+      port: 8086
+      username: ""
+      password: ""
+      database: ""
+      glob_measurement: ""
+      measurements:
+        FCRN-price-frcst:
+          fields:
+            - 'q25'
+            - 'q50'
+            - 'q75'
+          tags:
+            Type: 'FCR-N price'
+          freq: '15m'
+          fill: 'previous'
+          agg: 'max'
+        WS-price-frcst:
+          fields:
+            - 'q25'
+            - 'q50'
+            - 'q75'
+          tags:
+            Type: 'wholesale price'
+          freq: '15m'
+          fill: 'previous'
+          agg: 'max'
+        FCRN-up_energy-frcst:
+          fields:
+            - 'q25'
+            - 'q50'
+            - 'q75'
+          tags:
+            Type: 'FCR-N up_energy'
+          freq: '15m'
+          fill: 'linear'
+          agg: 'max'
+        FCRN-down_energy-frcst:
+          fields:
+            - 'q25'
+            - 'q50'
+            - 'q75'
+          tags:
+            Type: 'FCR-N down_energy'
+          freq: '15m'
+          fill: 'linear'
+          agg: 'max'
+        FCRN-down_power-frcst:
+          fields:
+            - 'q25'
+            - 'q50'
+            - 'q75'
+          tags:
+            Type: 'FCR-N down_power'
+          freq: '15m'
+          fill: 'linear'
+          agg: 'max'
+        FCRN-up_power-frcst:
+          fields:
+            - 'q25'
+            - 'q50'
+            - 'q75'
+          tags:
+            Type: 'FCR-N up_power'
+          freq: '15m'
+          fill: 'linear'
+          agg: 'max'
+        LUT-load-frcst:
+          fields:
+            - 'q25'
+            - 'q50'
+            - 'q75'
+          tags:
+            Type: 'LUT load'
+          freq: '15m'
+          fill: 'linear'
+          agg: 'max'
+        BESS:
+          fields:
+            - 'up_energy'
+            - 'down_energy'
+            - 'up_power'
+            - 'down_power'
+          tags:
+            Type: 'FCR-N'
+          freq: '15m'
+          fill: 'linear'
+          agg: 'max'
+        BID-submitted:
+          fields:
+            - 'FCRN_capacity'
+          tags:
+            Type: 'submitted'
+          freq: '15m'
+          fill: 'null'
+          agg: 'sum'
+        BID-accepted:
+          fields:
+            - 'FCRN_capacity'
+          tags:
+            Type: 'accepted'
+          freq: '15m'
+          fill: 'null'
+          agg: 'max'
+        BESS-energy:
+          fields:
+            - 'energy_state'
+          tags:
+            Type: 'bess test'
+          freq: '15m'
+          fill: 'null'
+          agg: 'max'
+        BESS-power:
+          fields:
+            - 'power_activated'
+            - 'power_required'
+          tags:
+            Type: 'bess test'
+          freq: '1s'
+          fill: 'null'
+          agg: 'max'
+        BESS-schedule:
+          fields:
+            - 'power_schedule'
+            - 'state'
+            - 'ref_energy_state'
+          tags:
+            Type: 'bess test'
+          freq: '15m'
+          fill: 'null'
+          agg: 'max'
+        LVDC-load:
+          fields:
+            - 'amr_kw'
+          tags:
+            Type: 'LVDC'
+          freq: '15m'
+          fill: 'linear'
+          agg: 'mean'
+        LVDC-load-frcst:
+          fields:
+            - 'q25'
+            - 'q50'
+            - 'q75'
+          tags:
+            Type: 'LVDC load'
+          freq: '15m'
+          fill: 'linear'
+          agg: 'max'
+    influxdb3:
+      host: ""
+      port: 8086
+      username: ""
+      password: ""
+      database: ""
+      glob_measurement: "frequency"
+      measurements:
+        frequency:
+          fields:
+            - 'frequency'
+          tags:
+            id: '93301'
+          freq: '1s'
+          fill: 'linear'
+          agg: 'mean'
+    influxdb4:
+      host: ""
+      port: 8086
+      username: ""
+      password: ""
+      database: ""
+      glob_measurement: "solar_forecast"
+      measurements:
+        solar-forecast:
+          fields:
+            - 'kwh'
+          tags:
+            location: 'Lappeenranta'
+          freq: '1h'
+          fill: 'linear'
+          agg: 'mean'
+    influxdb5:
+      host: ""
+      port: 8086
+      username: ""
+      password: ""
+      database: ""
+      glob_measurement: "energy"
+      measurements:
+        lut:
+          fields:
+            - 'total'
+          tags:
+            energy_sink: 'main'
+          freq: '1h'
+          fill: 'linear'
+          agg: 'count'
+    influxdb6:
+      host: "localhost"
+      port: 8086
+      username: "marketdata"
+      password: "gretrtreter"
+      database: "nordpool"
+      glob_measurement: "nordpool"
+      measurements:
+        wholesale:
+          fields:
+            - 'price'
+          tags:
+            area: 'FI'
+          freq: '1h'
+          fill: 'linear'
+          agg: 'max'
+
+    # influxdb3:
+    #   host: ""
+    #   port: 8086
+    #   username: ""
+    #   password: ""
+    #   database: ""
+    #   fields:
+    #     - 'price'
+    #   tags:
+    #     - 'FCR-N'
+  api:
+    fingrid:
+      Accept: 'text/csv'
+      x-api-key: 'XWN3lhIccU6MecQaUwbiq3zu4yNqAevA5OCJQ0N0'
+
+prediction:
+  models:
+    deepar1:
+      type: 'DeepAR'
+      targets:
+        - 'price'
+        # - 'power'
+      output: 'gaussian'
+      horizon: 24
+      window: 168
+      freq: 'H'
+      learning_rate: 1e-3
+      batch_size: 32
+      rnn_cell: 'lstm'
+      dropout_rate: 0.1
+      epochs: 300
+      patience: 30
+      num_batches_per_epoch: 30
+    deepar2:
+      type: 'DeepAR' #'Naive'
+      targets:
+        - 'up_energy'
+        - 'down_energy'
+        #- 'up_power'
+        #- 'down_power'
+      output: 'gaussian'
+      horizon: 192
+      window: 672
+      freq: '15T'
+      learning_rate: 1e-4
+      batch_size: 32
+      rnn_cell: 'lstm'
+      dropout_rate: 0.1
+      epochs: 200
+      patience: 30
+      num_batches_per_epoch: 20
+    deepar3:
+      type: 'FFNN'
+      targets:
+        - 'total'
+      output: 'gaussian'
+      horizon: 48
+      window: 168
+      freq: '1H'
+      learning_rate: 1e-3
+      batch_size: 32
+      rnn_cell: 'lstm'
+      dropout_rate: 0.1
+      epochs: 200
+      patience: 30
+      num_batches_per_epoch: 10
+    deepar4:
+      type: 'FFNN'
+      targets:
+        - 'amr_kw'
+      output: 'gaussian'
+      horizon: 192
+      window: 672
+      freq: '15T'
+      learning_rate: 1e-3
+      batch_size: 32
+      rnn_cell: 'lstm'
+      dropout_rate: 0.1
+      epochs: 200
+      patience: 30
+      num_batches_per_epoch: 10
+    deepar5:
+      type: 'DeepAR'
+      targets:
+        - 'wholesale_price'
+        # - 'power'
+      output: 'gaussian'
+      horizon: 24
+      window: 168
+      freq: 'H'
+      learning_rate: 1e-3
+      batch_size: 32
+      rnn_cell: 'lstm'
+      dropout_rate: 0.1
+      epochs: 300
+      patience: 30
+      num_batches_per_epoch: 30

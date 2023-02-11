@@ -1,0 +1,9 @@
+# The .gitignore file specifies things that git should ignore. 
+#
+# Temporary folder for your own usage
+#
+# Git should typically ignore everything in this directory  (except for this file)
+
+*
+!.gitignore
+#!SomeOtherFileToInclude
